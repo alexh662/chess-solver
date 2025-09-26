@@ -75,5 +75,5 @@ void Board::printBoard() {
   }
   cout << "  ";
   for (char c = 'a'; c <= 'h'; c++) cout << "\033[36m" << c << " ";
-  cout << endl << endl;
+  cout << "\033[0m" << endl << endl;
 }
