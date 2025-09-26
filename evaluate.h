@@ -3,6 +3,6 @@
 
 #include "board.h"
 
-int evaluateBoard(Board& board);
+double evaluateBoard(Board& board);
 
 #endif

@@ -42,6 +42,17 @@ void Board::makeMove(const Move& move) {
   } else {
     board[move.tRow][move.tCol] = Piece(move.promotion.type, piece.colour);
   }
+
+  // check if first pawn move for en passant
+  if (piece.type == PAWN && ((move.fRow == 6 && move.tRow == 4) || (move.fRow == 1 && move.tRow == 3))) {
+    enPassantCords = {(move.fRow + move.tRow) / 2, move.fCol};
+    enPassant = true;
+  } else enPassant = false;
+}
+
+void Board::undoMove(const Move& move) {
+  board[move.tRow][move.tCol] = move.capturedPiece;
+  board[move.fRow][move.fCol] = move.movedPiece;
 }
 
 Piece Board::getPiece(int row, int col) {

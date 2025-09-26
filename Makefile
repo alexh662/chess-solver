@@ -3,10 +3,10 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -O2
 
 # Source files
-SRC = main.cpp board.cpp evaluate.cpp # minimax.cpp
+SRC = main.cpp board.cpp evaluate.cpp minimax.cpp
 
 # Header files (optional, for dependency tracking)
-HEADERS = board.h evaluate.h # minimax.h
+HEADERS = board.h evaluate.h minimax.h
 
 # Executable name
 TARGET = main

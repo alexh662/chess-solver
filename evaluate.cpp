@@ -2,7 +2,7 @@
 #include "evaluate.h"
 #include <vector>
 
-int evaluateBoard(Board& board) {
+double evaluateBoard(Board& board) {
   double pieceValues[7] = {0, 1, 3.2, 3.33, 5.1, 9.5, 1000};
   double val = 0;
 
@@ -15,5 +15,6 @@ int evaluateBoard(Board& board) {
     }
   }
 
+  if (abs(val) < 1e-6) val = 0;
   return val;
 }
