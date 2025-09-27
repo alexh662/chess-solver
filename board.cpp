@@ -61,7 +61,7 @@ Piece Board::getPiece(int row, int col) {
 
 void Board::printBoard() {
   for (int i = 0; i < 8; i++) {
-    cout << "\033[35m" << i + 1 << " " << "\033[0m";
+    cout << "\033[35m" << 8 - i << " " << "\033[0m";
     for (int j = 0; j < 8; j++) {
       Piece piece = board[i][j];
       string output;

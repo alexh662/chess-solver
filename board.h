@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-enum PieceType { EMPTY, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING};
+enum PieceType { EMPTY, PAWN, BISHOP, KNIGHT, ROOK, QUEEN, KING};
 enum Colour { WHITE, BLACK, NONE };
 
 struct Piece {
