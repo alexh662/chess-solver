@@ -5,6 +5,53 @@
 
 using namespace std;
 
+bool inCheck(Board& board, int i, int j) {
+  Piece piece = board.getPiece(i, j);
+  
+  // check pawns
+  int direction = -1;
+  if (piece.colour == WHITE) direction = 1;
+  if ((i + direction >= 0 && i + direction < 8 && j + 1 < 8) && (board.getPiece(i + direction, j + 1).colour != piece.colour && board.getPiece(i + direction, j + 1).type == PAWN)) return true;
+  if ((i + direction >= 0 && i + direction < 8 && j - 1 >= 0) && (board.getPiece(i + direction, j - 1).colour != piece.colour && board.getPiece(i + direction, j - 1).type == PAWN)) return true;
+
+  // check bishops and queens
+  for (int dy = -1; dy <= 1; dy += 2) {
+    for (int dx = -1; dx <= 1; dx += 2) {
+      for (int m = 1; i + dy*m >= 0 && i + dy*m < 8 && j + dx*m >= 0 && j + dx*m < 8; m++) {
+        if (board.getPiece(i + dy*m, j + dx*m).type != EMPTY) {
+          if (board.getPiece(i + dy*m, j + dx*m).colour != piece.colour && (board.getPiece(i + dy*m, j + dx*m).type == BISHOP || board.getPiece(i + dy*m, j + dx*m).type == QUEEN)) return true;
+          break;
+        }
+      }
+    }
+  }
+
+  // check knights
+  vector<pair<int, int>> knightMoves = {{2, 1}, {1, 2}, {-1, 2}, {-2, 1}, {-2, -1}, {-1, -2}, {1, -2}, {2, -1}};
+  for (pair<int, int> p : knightMoves) {
+    if (i + p.first >= 0 && i + p.first < 8 && j + p.second >= 0 && j + p.second < 8 && board.getPiece(i + p.first, j + p.second).colour != piece.colour && board.getPiece(i + p.first, j + p.second).type == KNIGHT) return true;
+  }
+
+  // check rooks and queens
+  vector<pair<int, int>> rookMoves = {{1, 0}, {0, 1}, {0, -1}, {-1, 0}};
+  for (pair<int, int> p : rookMoves) {
+    for (int m = 1; i + p.first*m >= 0 && i + p.first*m < 8 && j + p.second*m >= 0 && j + p.second*m < 8; m++) {
+      if (board.getPiece(i + p.first*m, j + p.second*m).type != EMPTY) {
+        if (board.getPiece(i + p.first*m, j + p.second*m).colour != piece.colour && (board.getPiece(i + p.first*m, j + p.second*m).type == ROOK || board.getPiece(i + p.first*m, j + p.second*m).type == QUEEN)) return true;
+        break;
+      }
+    }
+  }
+
+  // check kings
+  vector<pair<int, int>> kings = {{1, 1}, {1, 0}, {0, 1}, {1, -1}, {0, -1}, {-1, 0}, {-1, 1}, {-1, -1}};
+  for (pair<int, int> p : kings) {
+    if (i + p.first >= 0 && i + p.first < 8 && j + p.second >= 0 && j + p.second < 8 && board.getPiece(i + p.first, j + p.second).colour != piece.colour && board.getPiece(i + p.first, j + p.second).type == KING) return true;
+  }
+
+  return false;
+}
+
 void generatePawnMoves(Board& board, int i, int j, vector<Move>& moves) {
   Piece piece = board.getPiece(i, j);
   int direction = 1;
@@ -66,11 +113,44 @@ void generateKnightMoves(Board& board, int i, int j, vector<Move>& moves) {
   }
 }
 
-void generateRookMoves(Board& board, int i, int j, vector<Move>& moves) {}
+void generateRookMoves(Board& board, int i, int j, vector<Move>& moves) {
+  Piece piece = board.getPiece(i, j);
+  vector<pair<int, int>> rookMoves = {{1, 0}, {0, 1}, {0, -1}, {-1, 0}};
+  
+  for (pair<int, int> p : rookMoves) {
+    int m = 1;
+    bool end = false;
+    while (i + p.first*m >= 0 && i + p.first*m < 8 && j + p.second*m >= 0 && j + p.second*m < 8 && !end) {
+      if (board.getPiece(i + p.first*m, j + p.second*m).type != EMPTY) {
+        end = true;
+        if (board.getPiece(i + p.first*m, j + p.second*m).colour != piece.colour) moves.push_back(Move(i, j, i + p.first*m, j + p.second*m, piece, board.getPiece(i + p.first*m, j + p.second*m)));
+      } else moves.push_back(Move(i, j, i + p.first*m, j + p.second*m, piece));
+      m++;
+    }
+  }
+}
 
-void generateQueenMoves(Board& board, int i, int j, vector<Move>& moves) {}
+void generateQueenMoves(Board& board, int i, int j, vector<Move>& moves) {
+  generateBishopMoves(board, i, j, moves);
+  generateRookMoves(board, i, j, moves);
+}
 
-void generateKingMoves(Board& board, int i, int j, vector<Move>& moves) {}
+void generateKingMoves(Board& board, int i, int j, vector<Move>& moves) {
+  Piece piece = board.getPiece(i, j);
+  vector<pair<int, int>> kingMoves = {{1, 1}, {1, 0}, {0, 1}, {1, -1}, {0, -1}, {-1, 0}, {-1, 1}, {-1, -1}};
+
+  for (pair<int, int> p : kingMoves) {
+    if (i + p.first >= 0 && i + p.first < 8 && j + p.second >= 0 && j + p.second < 8) {
+      Piece capturedPiece = board.getPiece(i + p.first, j + p.second);
+      if (capturedPiece.colour != piece.colour) {
+        Move move = Move(i, j, i + p.first, j + p.second, piece, capturedPiece);
+        board.makeMove(move);
+        if (!inCheck(board, i + p.first, j + p.second)) moves.push_back(move);
+        board.undoMove(move);
+      }
+    }
+  }
+}
 
 vector<Move> generateMoves(Board& board, bool whiteToMove) {
   vector<Move> moves;
@@ -92,10 +172,13 @@ vector<Move> generateMoves(Board& board, bool whiteToMove) {
           break;
         case ROOK:
           generateRookMoves(board, i, j, moves);
+          break;
         case QUEEN:
           generateQueenMoves(board, i, j, moves);
+          break;
         case KING:
           generateKingMoves(board, i, j, moves);
+          break;
         default: break;
       }
     }

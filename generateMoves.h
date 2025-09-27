@@ -5,6 +5,8 @@
 #include "evaluate.h"
 #include <vector>
 
+bool inCheck(Board& board, int i, int j);
+
 void generatePawnMoves(Board& board, int i, int j, std::vector<Move>& moves);
 void generateBishopMoves(Board& board, int i, int j, std::vector<Move>& moves);
 void generateKnightMoves(Board& board, int i, int j, std::vector<Move>& moves);
