@@ -12,6 +12,6 @@ State isGameOver(Board& board, bool whiteToMove);
 
 std::pair<Move, double> bestMove(Board& board, int depth, bool whiteToMove);
 
-double minimax(Board& board, int depth, bool whiteToMove);
+double minimax(Board& board, int depth, double alpha, double beta, bool whiteToMove);
 
 #endif

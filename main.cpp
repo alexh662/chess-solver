@@ -9,7 +9,6 @@ using namespace std;
 
 int main() {
   Board board = Board();
-  board.printBoard();
   cout << evaluateBoard(board) << endl;
   Move m = Move(6, 3, 4, 3, board.getPiece(6, 3));
   board.makeMove(m);
@@ -25,7 +24,7 @@ int main() {
   vector<Move> moves = generateMoves(board, true);
   printMoves(moves);
 
-  pair<Move, double> best = bestMove(board, 4, true);
+  pair<Move, double> best = bestMove(board, 6, true);
   printMove(best.first);
   cout << ", " << best.second << endl;
 

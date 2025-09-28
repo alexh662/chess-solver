@@ -24,7 +24,7 @@ pair<Move, double> bestMove(Board& board, int depth, bool whiteToMove) {
 
   for (Move m : moves) {
     board.makeMove(m);
-    double eval = minimax(board, depth - 1, !whiteToMove);
+    double eval = minimax(board, depth - 1, -100000, 100000, !whiteToMove);
     board.undoMove(m);
 
     if (whiteToMove && eval > bestEval) {
@@ -39,23 +39,29 @@ pair<Move, double> bestMove(Board& board, int depth, bool whiteToMove) {
   return {best, bestEval};
 }
 
-double minimax(Board& board, int depth, bool whiteToMove) {
+double minimax(Board& board, int depth, double alpha, double beta, bool whiteToMove) {
   if (depth == 0 || isGameOver(board, whiteToMove)) return evaluateBoard(board);
 
   if (whiteToMove) {
     double maxEval = -100000;
     for (Move m : generateMoves(board, whiteToMove)) {
       board.makeMove(m);
-      maxEval = max(maxEval, minimax(board, depth - 1, false));
+      double eval = minimax(board, depth - 1, alpha, beta, false);
       board.undoMove(m);
+      maxEval = max(maxEval, eval);
+      alpha = max(alpha, eval);
+      if (beta <= alpha) break;
     }
     return maxEval;
   } else {
     double minEval = 100000;
     for (Move m : generateMoves(board, whiteToMove)) {
       board.makeMove(m);
-      minEval = min(minEval, minimax(board, depth - 1, true));
+      double eval = minimax(board, depth - 1, alpha, beta, true);
       board.undoMove(m);
+      minEval = min(minEval, eval);
+      beta = min(beta, eval);
+      if (beta <= alpha) break;
     }
     return minEval;
   }
