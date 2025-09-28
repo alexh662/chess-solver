@@ -4,6 +4,7 @@
 #include "board.h"
 #include "evaluate.h"
 #include <vector>
+#include <string>
 
 void addMove(Board& board, std::vector<Move>& moves, Move move);
 

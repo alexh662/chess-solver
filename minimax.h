@@ -5,6 +5,7 @@
 #include "evaluate.h"
 #include "generateMoves.h"
 #include <vector>
+#include <string>
 
 enum State { ONGOING, STALEMATE, WHITEWINS, BLACKWINS };
 

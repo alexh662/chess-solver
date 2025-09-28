@@ -9,8 +9,8 @@ State isGameOver(Board& board, bool whiteToMove) {
   vector<Move> moves = generateMoves(board, whiteToMove);
 
   if (moves.empty()) {
-    if (whiteToMove && inCheck(board, board.whiteKingCords.first, board.whiteKingCords.second)) return WHITEWINS;
-    else if (!whiteToMove && inCheck(board, board.blackKingCords.first, board.blackKingCords.second)) return BLACKWINS;
+    if (whiteToMove && inCheck(board, board.whiteKingCords.first, board.whiteKingCords.second)) return BLACKWINS;
+    else if (!whiteToMove && inCheck(board, board.blackKingCords.first, board.blackKingCords.second)) return WHITEWINS;
     else return STALEMATE;
   }
 
@@ -19,6 +19,7 @@ State isGameOver(Board& board, bool whiteToMove) {
 
 pair<Move, double> bestMove(Board& board, int depth, bool whiteToMove) {
   vector<Move> moves = generateMoves(board, whiteToMove);
+  if (moves.empty()) return {Move(0, 0, 0, 0, board.getPiece(0, 0)), whiteToMove ? -100000 : 100000};
   Move best = moves[0];
   double bestEval = whiteToMove ? -100000 : 100000;
 
@@ -40,7 +41,7 @@ pair<Move, double> bestMove(Board& board, int depth, bool whiteToMove) {
 }
 
 double minimax(Board& board, int depth, double alpha, double beta, bool whiteToMove) {
-  if (depth == 0 || isGameOver(board, whiteToMove)) return evaluateBoard(board);
+  if (depth == 0 || isGameOver(board, whiteToMove) != ONGOING) return evaluateBoard(board);
 
   if (whiteToMove) {
     double maxEval = -100000;

@@ -9,24 +9,20 @@ using namespace std;
 
 int main() {
   Board board = Board();
-  cout << evaluateBoard(board) << endl;
-  Move m = Move(6, 3, 4, 3, board.getPiece(6, 3));
-  board.makeMove(m);
-  m = Move(1, 2, 2, 2, board.getPiece(1, 2));
-  board.makeMove(m);
-  m = Move(0, 3, 3, 0, board.getPiece(0, 3));
-  board.makeMove(m);
-  m = Move(3, 0, 3, 3, board.getPiece(0, 3));
-  board.makeMove(m);
-  m = Move(3, 3, 4, 3, board.getPiece(3, 3));
-  board.makeMove(m);
   board.printBoard();
-  vector<Move> moves = generateMoves(board, true);
-  printMoves(moves);
 
-  pair<Move, double> best = bestMove(board, 6, true);
-  printMove(best.first);
-  cout << ", " << best.second << endl;
+  while (isGameOver(board, false) == ONGOING && isGameOver(board, true) == ONGOING) {
+    string s;
+    cout << "enter move: ";
+    cin >> s;
+    Move m = board.stringToMove(s);
+    board.makeMove(m);
+    board.printBoard();
+
+    pair<Move, double> best = bestMove(board, 5, false);
+    board.makeMove(best.first);
+    board.printBoard();
+  }
 
   return -1;
 }

@@ -33,9 +33,36 @@ Board::Board() {
   for(int i = 0; i < 8; i++) board[6][i] = Piece(PAWN, WHITE);
 }
 
+Move Board::stringToMove(string s) {
+  int fCol = s[0] - 'a';
+  int fRow = 8 - (s[1] - '0');
+  int tCol = s[2] - 'a';
+  int tRow = 8 - (s[3] - '0');
+  
+  Piece promo;
+
+  if (s.length() > 4) {
+    char c = toupper(s[4]);
+    PieceType pt;
+
+    switch (c) {
+        case 'Q': pt = QUEEN; break;
+        case 'R': pt = ROOK; break;
+        case 'B': pt = BISHOP; break;
+        case 'N': pt = KNIGHT; break;
+        default: pt = EMPTY; break;
+    }
+
+    promo = Piece(pt, board[fRow][fCol].colour);
+  }
+
+  Move m = Move(fRow, fCol, tRow, tCol, board[fRow][fCol], board[tRow][tCol], promo);
+  return m;
+}
+
 void Board::makeMove(Move& move) {
   Piece piece = board[move.fRow][move.fCol];
-  board[move.fRow][move.fCol] = Piece(EMPTY, NONE);
+  board[move.fRow][move.fCol] = Piece();
 
   if (move.promotion.type == EMPTY) {
     board[move.tRow][move.tCol] = piece;
@@ -43,50 +70,45 @@ void Board::makeMove(Move& move) {
     board[move.tRow][move.tCol] = Piece(move.promotion.type, piece.colour);
   }
 
+  move.prevEnPassantCords = enPassantCords;
+  move.prevEnPassant = enPassant;
+
   // check if first pawn move for en passant
   if (piece.type == PAWN && ((move.fRow == 6 && move.tRow == 4) || (move.fRow == 1 && move.tRow == 3))) {
-    move.prevEnPassantCords = enPassantCords;
-    move.prevEnPassant = enPassant;
-    enPassantCords = {(move.fRow + move.tRow) / 2, move.fCol};
+    enPassantCords = {move.tRow, move.tCol};
     enPassant = true;
   } else enPassant = false;
 
-  // remove killed pawn during en passant
-  if (piece.type == PAWN && move.tCol != move.fCol && board[move.tRow][move.tCol].type == EMPTY) board[move.fRow][move.tCol] = Piece();
+  // en passant
+  move.enPassantCapture = false;
+  if (piece.type == PAWN && move.tCol != move.fCol && move.capturedPiece.type == PAWN && board[move.tRow][move.tCol].type == EMPTY) {
+    board[move.fRow][move.tCol] = Piece();
+    move.enPassantCapture = true;
+  }
 
   if (move.movedPiece.type == KING) {
-    if (move.movedPiece.colour == WHITE) {
-      whiteKingCords.first = move.tRow;
-      whiteKingCords.second = move.tCol;
-    } else if (move.movedPiece.colour == BLACK) {
-      blackKingCords.first = move.tRow;
-      blackKingCords.second = move.tCol;
-    }
+    if (move.movedPiece.colour == WHITE) whiteKingCords = {move.tRow, move.tCol};
+    else if (move.movedPiece.colour == BLACK) blackKingCords = {move.tRow, move.tCol};
   }
 }
 
 void Board::undoMove(Move& move) {
-  // undo en passant
-  enPassantCords = move.prevEnPassantCords;
-  enPassant = move.prevEnPassant;
+  board[move.fRow][move.fCol] = move.movedPiece;
 
-  if (move.movedPiece.type == PAWN && move.tCol != move.fCol && move.capturedPiece.type == PAWN && board[move.tRow][move.tCol].type == EMPTY) {
-    board[move.fRow][move.tCol] = move.capturedPiece;
+  if (move.enPassantCapture) {
+    int captureRow = move.movedPiece.colour == WHITE ? move.tRow + 1 : move.tRow - 1;
+    board[captureRow][move.tCol] = move.capturedPiece;
     board[move.tRow][move.tCol] = Piece();
   } else {
     board[move.tRow][move.tCol] = move.capturedPiece;
   }
 
-  board[move.fRow][move.fCol] = move.movedPiece;
+  enPassantCords = move.prevEnPassantCords;
+  enPassant = move.prevEnPassant;
 
   if (move.movedPiece.type == KING) {
-    if (move.movedPiece.colour == WHITE) {
-      whiteKingCords.first = move.fRow;
-      whiteKingCords.second = move.fCol;
-    } else if (move.movedPiece.colour == BLACK) {
-      blackKingCords.first = move.fRow;
-      blackKingCords.second = move.fCol;
-    }
+    if (move.movedPiece.colour == WHITE) whiteKingCords = {move.fRow, move.fCol};
+    else if (move.movedPiece.colour == BLACK) blackKingCords = {move.fRow, move.fCol};
   }
 }
 

@@ -75,7 +75,7 @@ void generatePawnMoves(Board& board, int i, int j, vector<Move>& moves) {
               addMove(board, moves, Move(i, j, i + direction, j + k, piece, board.getPiece(i + direction, j + k), promo));
             }
             addMove(board, moves, Move(i, j, i + direction, j + k, piece, board.getPiece(i + direction, j + k)));
-          } else if (board.enPassant && board.enPassantCords.first == i + direction && board.enPassantCords.second == j + k) addMove(board, moves, Move(i, j, i + direction, j + k, piece, board.getPiece(i, j + k)));
+          } else if (board.enPassant && board.enPassantCords.first == i + direction && board.enPassantCords.second == j + k) addMove(board, moves, Move(i, j, i + direction, j + k, piece, board.getPiece(i, j + k), Piece(), true));
         } else if (board.getPiece(i + direction, j).type == EMPTY) {
           if ((direction == 1 && i + direction == 7) || (direction == -1 && i + direction == 0)) for (int p = 2; p <= 5; p++) {
             Piece promo = Piece(static_cast<PieceType>(p), piece.colour);
