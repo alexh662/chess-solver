@@ -5,6 +5,8 @@
 #include "evaluate.h"
 #include <vector>
 
+void addMove(Board& board, std::vector<Move>& moves, Move move);
+
 bool inCheck(Board& board, int i, int j);
 
 void generatePawnMoves(Board& board, int i, int j, std::vector<Move>& moves);
@@ -15,6 +17,8 @@ void generateQueenMoves(Board& board, int i, int j, std::vector<Move>& moves);
 void generateKingMoves(Board& board, int i, int j, std::vector<Move>& moves);
 
 std::vector<Move> generateMoves(Board& board, bool whiteToMove);
+
+void printMove(Move& move);
 
 void printMoves(std::vector<Move>& moves);
 

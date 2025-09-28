@@ -5,6 +5,14 @@
 
 using namespace std;
 
+void addMove(Board& board, vector<Move>& moves, Move move) {
+  board.makeMove(move);
+  Colour colour = move.movedPiece.colour;
+  if (colour == WHITE && !inCheck(board, board.whiteKingCords.first, board.whiteKingCords.second)) moves.push_back(move);
+  if (colour == BLACK && !inCheck(board, board.blackKingCords.first, board.blackKingCords.second)) moves.push_back(move);
+  board.undoMove(move);
+}
+
 bool inCheck(Board& board, int i, int j) {
   Piece piece = board.getPiece(i, j);
   
@@ -64,19 +72,19 @@ void generatePawnMoves(Board& board, int i, int j, vector<Move>& moves) {
           if ((board.getPiece(i + direction, j + k).colour == WHITE && piece.colour == BLACK) || (board.getPiece(i + direction, j + k).colour == BLACK && piece.colour == WHITE)) {
             if ((direction == 1 && i + direction == 7) || (direction == -1 && i + direction == 0)) for (int p = 2; p <= 5; p++) {
               Piece promo = Piece(static_cast<PieceType>(p), piece.colour);
-              moves.push_back(Move(i, j, i + direction, j + k, piece, board.getPiece(i + direction, j + k), promo));
+              addMove(board, moves, Move(i, j, i + direction, j + k, piece, board.getPiece(i + direction, j + k), promo));
             }
-            moves.push_back(Move(i, j, i + direction, j + k, piece, board.getPiece(i + direction, j + k)));
-          } else if (board.enPassant && board.enPassantCords.first == i + direction && board.enPassantCords.second == j + k) moves.push_back(Move(i, j, i + direction, j + k, piece, board.getPiece(i, j + k)));
+            addMove(board, moves, Move(i, j, i + direction, j + k, piece, board.getPiece(i + direction, j + k)));
+          } else if (board.enPassant && board.enPassantCords.first == i + direction && board.enPassantCords.second == j + k) addMove(board, moves, Move(i, j, i + direction, j + k, piece, board.getPiece(i, j + k)));
         } else if (board.getPiece(i + direction, j).type == EMPTY) {
           if ((direction == 1 && i + direction == 7) || (direction == -1 && i + direction == 0)) for (int p = 2; p <= 5; p++) {
             Piece promo = Piece(static_cast<PieceType>(p), piece.colour);
-            moves.push_back(Move(i, j, i + direction, j, piece, Piece(), promo));
+            addMove(board, moves, Move(i, j, i + direction, j, piece, Piece(), promo));
           }
-          moves.push_back(Move(i, j, i + direction, j, piece));
+          addMove(board, moves, Move(i, j, i + direction, j, piece));
 
-          if (piece.colour == WHITE && i == 6 && board.getPiece(i - 2, j).type == EMPTY) moves.push_back(Move(i, j, i - 2, j, piece));
-          else if (piece.colour == BLACK && i == 1 && board.getPiece(i + 2, j).type == EMPTY) moves.push_back(Move(i, j, i + 2, j, piece));
+          if (piece.colour == WHITE && i == 6 && board.getPiece(i - 2, j).type == EMPTY) addMove(board, moves, Move(i, j, i - 2, j, piece));
+          else if (piece.colour == BLACK && i == 1 && board.getPiece(i + 2, j).type == EMPTY) addMove(board, moves, Move(i, j, i + 2, j, piece));
         }
       }
     }
@@ -93,8 +101,8 @@ void generateBishopMoves(Board& board, int i, int j, vector<Move>& moves) {
       while (i + k*m >= 0 && i + k*m < 8 && j + l*m >= 0 && j + l*m < 8 && !end) {
         if (board.getPiece(i + k*m, j + l*m).type != EMPTY) {
           end = true;
-          if (board.getPiece(i + k*m, j + l*m).colour != piece.colour) moves.push_back(Move(i, j, i + k*m, j + l*m, piece, board.getPiece(i + k*m, j + l*m)));
-        } else moves.push_back(Move(i, j, i + k*m, j + l*m, piece));
+          if (board.getPiece(i + k*m, j + l*m).colour != piece.colour) addMove(board, moves, Move(i, j, i + k*m, j + l*m, piece, board.getPiece(i + k*m, j + l*m)));
+        } else addMove(board, moves, Move(i, j, i + k*m, j + l*m, piece));
         m++;
       }
     }
@@ -107,8 +115,8 @@ void generateKnightMoves(Board& board, int i, int j, vector<Move>& moves) {
 
   for (int k = 0; k < 8; k++) {
     if (i + knightMoves[k].first >= 0 && i + knightMoves[k].first < 8 && j + knightMoves[k].second >= 0 && j + knightMoves[k].second < 8) {
-      if (board.getPiece(i + knightMoves[k].first, j + knightMoves[k].second).type == EMPTY) moves.push_back(Move(i, j, i + knightMoves[k].first, j + knightMoves[k].second, piece));
-      else if (board.getPiece(i + knightMoves[k].first, j + knightMoves[k].second).colour != piece.colour) moves.push_back(Move(i, j, i + knightMoves[k].first, j + knightMoves[k].second, piece, board.getPiece(i + knightMoves[k].first, j + knightMoves[k].second)));
+      if (board.getPiece(i + knightMoves[k].first, j + knightMoves[k].second).type == EMPTY) addMove(board, moves, Move(i, j, i + knightMoves[k].first, j + knightMoves[k].second, piece));
+      else if (board.getPiece(i + knightMoves[k].first, j + knightMoves[k].second).colour != piece.colour) addMove(board, moves, Move(i, j, i + knightMoves[k].first, j + knightMoves[k].second, piece, board.getPiece(i + knightMoves[k].first, j + knightMoves[k].second)));
     }
   }
 }
@@ -123,8 +131,8 @@ void generateRookMoves(Board& board, int i, int j, vector<Move>& moves) {
     while (i + p.first*m >= 0 && i + p.first*m < 8 && j + p.second*m >= 0 && j + p.second*m < 8 && !end) {
       if (board.getPiece(i + p.first*m, j + p.second*m).type != EMPTY) {
         end = true;
-        if (board.getPiece(i + p.first*m, j + p.second*m).colour != piece.colour) moves.push_back(Move(i, j, i + p.first*m, j + p.second*m, piece, board.getPiece(i + p.first*m, j + p.second*m)));
-      } else moves.push_back(Move(i, j, i + p.first*m, j + p.second*m, piece));
+        if (board.getPiece(i + p.first*m, j + p.second*m).colour != piece.colour) addMove(board, moves, Move(i, j, i + p.first*m, j + p.second*m, piece, board.getPiece(i + p.first*m, j + p.second*m)));
+      } else addMove(board, moves, Move(i, j, i + p.first*m, j + p.second*m, piece));
       m++;
     }
   }
@@ -143,10 +151,7 @@ void generateKingMoves(Board& board, int i, int j, vector<Move>& moves) {
     if (i + p.first >= 0 && i + p.first < 8 && j + p.second >= 0 && j + p.second < 8) {
       Piece capturedPiece = board.getPiece(i + p.first, j + p.second);
       if (capturedPiece.colour != piece.colour) {
-        Move move = Move(i, j, i + p.first, j + p.second, piece, capturedPiece);
-        board.makeMove(move);
-        if (!inCheck(board, i + p.first, j + p.second)) moves.push_back(move);
-        board.undoMove(move);
+        addMove(board, moves, Move(i, j, i + p.first, j + p.second, piece, capturedPiece));
       }
     }
   }
@@ -187,6 +192,19 @@ vector<Move> generateMoves(Board& board, bool whiteToMove) {
   return moves;
 }
 
+void printMove(Move& m) {
+  string pieceToString[7] = {"", "", "B", "N", "R", "Q", "K"};
+  string output;
+
+  output += pieceToString[m.movedPiece.type];
+  output += 'a' + m.fCol;
+  output += to_string(8 - m.fRow);
+  output += 'a' + m.tCol;
+  output += to_string(8 - m.tRow);
+
+  cout << output;
+}
+
 void printMoves(std::vector<Move>& moves) {
   string pieceToString[7] = {"", "", "B", "N", "R", "Q", "K"};
   bool first = true;
@@ -196,6 +214,7 @@ void printMoves(std::vector<Move>& moves) {
     else first = false;
 
     string output;
+
     output += pieceToString[m.movedPiece.type];
     output += 'a' + m.fCol;
     output += to_string(8 - m.fRow);

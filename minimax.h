@@ -6,8 +6,12 @@
 #include "generateMoves.h"
 #include <vector>
 
-Move bestMove(Board& board, int depth, bool whiteToMove);
+enum State { ONGOING, STALEMATE, WHITEWINS, BLACKWINS };
 
-int minimax(Board& board, int depth, bool whiteToMove, bool maximizingPlayer);
+State isGameOver(Board& board, bool whiteToMove);
+
+std::pair<Move, double> bestMove(Board& board, int depth, bool whiteToMove);
+
+double minimax(Board& board, int depth, bool whiteToMove);
 
 #endif
