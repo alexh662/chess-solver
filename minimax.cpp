@@ -2,6 +2,7 @@
 #include "minimax.h"
 #include <vector>
 #include <algorithm>
+#include <thread>
 
 using namespace std;
 
