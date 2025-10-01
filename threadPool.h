@@ -1,3 +1,6 @@
+#ifndef THREADPOOL_H
+#define THREADPOOL_H
+
 #pragma once
 #include <condition_variable>
 #include <functional>
@@ -60,3 +63,5 @@ private:
 
   bool stop = false;
 };
+
+#endif

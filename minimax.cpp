@@ -1,8 +1,12 @@
 #include <iostream>
-#include "minimax.h"
 #include <vector>
 #include <algorithm>
 #include <thread>
+#include <future>
+#include <limits>
+#include <mutex>
+#include "minimax.h"
+#include "threadPool.h"
 
 using namespace std;
 
@@ -18,24 +22,47 @@ State isGameOver(Board& board, bool whiteToMove) {
   return ONGOING;
 }
 
-pair<Move, double> bestMove(Board& board, int depth, bool whiteToMove) {
+pair<Move, double> bestMove(Board& board, int depth, bool whiteToMove, Threadpool& threadPool) {
   vector<Move> moves = generateMoves(board, whiteToMove);
   if (moves.empty()) return {Move(0, 0, 0, 0, board.getPiece(0, 0)), whiteToMove ? -100000 : 100000};
+
   Move best = moves[0];
   double bestEval = whiteToMove ? -100000 : 100000;
 
-  for (Move m : moves) {
-    board.makeMove(m);
-    double eval = minimax(board, depth - 1, -100000, 100000, !whiteToMove);
-    board.undoMove(m);
+  mutex resultMutex;
+  vector<future<void>> futures;
+  atomic<int> pending(moves.size());
+  condition_variable done;
+  mutex doneMutex;
 
-    if (whiteToMove && eval > bestEval) {
-      best = m;
-      bestEval = eval;
-    } else if (!whiteToMove && eval < bestEval) {
-      best = m;
-      bestEval = eval;
-    }
+  for (Move& m : moves) {
+    threadPool.enqueue([&, m]() {
+      Board localBoard = board;
+      localBoard.makeMove(m);
+      double eval = minimax(localBoard, depth - 1, -100000, 100000, !whiteToMove);
+
+      {
+        lock_guard<mutex> lock(resultMutex);
+
+        if (whiteToMove && eval > bestEval) {
+          best = m;
+          bestEval = eval;
+        } else if (!whiteToMove && eval < bestEval) {
+          best = m;
+          bestEval = eval;
+        }
+      }
+
+      if (--pending == 0) {
+        lock_guard<mutex> lock(doneMutex);
+        done.notify_one();
+      }
+    });
+  }
+
+  {
+    unique_lock<mutex> lock(doneMutex);
+    done.wait(lock, [&]() { return pending == 0; });
   }
 
   return {best, bestEval};

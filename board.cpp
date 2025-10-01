@@ -60,7 +60,7 @@ Move Board::stringToMove(string s) {
   return m;
 }
 
-void Board::makeMove(Move& move) {
+void Board::makeMove(Move move) {
   Piece piece = board[move.fRow][move.fCol];
   board[move.fRow][move.fCol] = Piece();
 
@@ -92,7 +92,7 @@ void Board::makeMove(Move& move) {
   }
 }
 
-void Board::undoMove(Move& move) {
+void Board::undoMove(Move move) {
   board[move.fRow][move.fCol] = move.movedPiece;
 
   if (move.enPassantCapture) {

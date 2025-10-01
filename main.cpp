@@ -4,10 +4,14 @@
 #include "evaluate.h"
 #include "generateMoves.h"
 #include "minimax.h"
+#include "threadPool.h"
 
 using namespace std;
 
 int main() {
+  int depth = 6;
+  Threadpool threadPool(std::thread::hardware_concurrency());
+
   Board board = Board();
   board.printBoard();
 
@@ -19,7 +23,7 @@ int main() {
     board.makeMove(m);
     board.printBoard();
 
-    pair<Move, double> best = bestMove(board, 5, false);
+    pair<Move, double> best = bestMove(board, depth, false, threadPool);
     board.makeMove(best.first);
     board.printBoard();
   }

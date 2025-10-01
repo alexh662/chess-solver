@@ -41,9 +41,9 @@ public:
 
   Move stringToMove(std::string s);
 
-  void makeMove(Move& move);
+  void makeMove(Move move);
 
-  void undoMove(Move& move);
+  void undoMove(Move move);
 
   Piece getPiece(int row, int col);
 
